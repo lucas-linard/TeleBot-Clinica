@@ -16,6 +16,7 @@ class User:
     def __init__(self, name):
         self.name = name
         self.id = None
+        self.especialidade = None
         self.medico = None
         self.data = None
         self.hora = None
@@ -30,44 +31,46 @@ def write_json(data, filename='bd.json'):
         json.dump(data, f, indent=4)       
 
 @bot.message_handler(commands=["MarcarConsulta"])
-def opcao1(mensagem):
+def MarcarConsulta(mensagem):
     chat_id = mensagem.chat.id
     name = mensagem.from_user.first_name
     user = User(name)
-    user_dict[chat_id] = user
-    texto = """
-    Qual é a sua necessidade? (Clique em uma opção)
-    /ClinicoGeral Clinico Geral
-    """
-    msg = bot.reply_to(mensagem, texto)        
-    #write_json(mensagem)
-    if (mensagem.text == "Voltar"):
-            return msg
-    bot.register_next_step_handler(msg, EscolherClinicoGeral)
+    user_dict[chat_id] = user    
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)                
+    markup.add("Clinico Geral","Ortopedista","Psicólogo","Voltar")
+    msg = bot.reply_to(mensagem, 'Qual é a sua necessidade?', reply_markup=markup)
+    bot.register_next_step_handler(msg, EscolherEspecialidadeHandler)
 
+def EscolherEspecialidadeHandler(mensagem):
+    if(mensagem.text == "Clinico Geral"):
+        EscolherClinicoGeral(mensagem)
+    if(mensagem.text == "Voltar"):
+        Iniciar(mensagem)
+        
 
-def EscolherClinicoGeral(mensagem):        
-    with open('bd.json') as json_file:
-        data = json.load(json_file)
-        data = data["medicos"]
-        texto = f"""
-        Escolha um medico disponivel de sua preferencia!
-        /1 - {data[0]["name"]}
-        /2 - {data[1]["name"]}
-        /3 - {data[2]["name"]}
-        """                        
-        markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)                
-        markup.add(data[0]["name"], data[1]["name"], data[2]["name"],"Voltar")
-        msg = bot.reply_to(mensagem, 'Escolha um medico disponivel de sua preferencia! (Clique em uma opção)', reply_markup=markup)
-        if (mensagem.text == "Voltar"):
-            return msg
-        bot.register_next_step_handler(msg, EscolherDiaClinicoGeral)        
+def EscolherClinicoGeral(mensagem):  
+    # if(mensagem.text == "Voltar"):
+    #     MarcarConsulta(mensagem)  
+    # else :        
+        with open('bd.json') as json_file:
+            data = json.load(json_file)
+            data = data["medicos"]
+            texto = f"""
+            Escolha um medico disponivel de sua preferencia!
+            /1 - {data[0]["name"]}
+            /2 - {data[1]["name"]}
+            /3 - {data[2]["name"]}
+            """                        
+            markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)                
+            markup.add(data[0]["name"], data[1]["name"], data[2]["name"],"Voltar")
+            msg = bot.reply_to(mensagem, 'Escolha um medico disponivel de sua preferencia! (Clique em uma opção)', reply_markup=markup)      
+            bot.register_next_step_handler(msg, EscolherDiaClinicoGeral)
         
 
 def EscolherDiaClinicoGeral(mensagem):
     if(mensagem.text == "Voltar"):
-        msg = opcao1(mensagem)
-        bot.register_next_step_handler(msg, opcao1)
+        mensagem.text = ""
+        MarcarConsulta(mensagem)
     else :
         dia =  date.today()               
         chat_id = mensagem.chat.id
@@ -75,60 +78,147 @@ def EscolherDiaClinicoGeral(mensagem):
         user = user_dict[chat_id]
         user.medico = medico
         markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)
-        markup.add((dia).strftime("%d/%m/%Y"), (dia + timedelta(days=randrange(30))).strftime("%d/%m/%Y"), (dia + timedelta(days=randrange(70))).strftime("%d/%m/%Y"))
-        msg = bot.reply_to(mensagem, 'Qual dos dias disponiveis você deseja marcar a consulta? (Clique em uma opção)', reply_markup=markup)    
-        if (mensagem.text == "Voltar"):
-            return msg
+        markup.add((dia).strftime("%d/%m/%Y"), (dia + timedelta(days=randrange(30))).strftime("%d/%m/%Y"), (dia + timedelta(days=randrange(70))).strftime("%d/%m/%Y"),"Voltar")
+        msg = bot.reply_to(mensagem, 'Qual dos dias disponiveis você deseja marcar a consulta? (Clique em uma opção)', reply_markup=markup)            
         bot.register_next_step_handler(msg, EscolherHorarioClinicoGeral)
 
 def EscolherHorarioClinicoGeral(mensagem):    
-    texto = """
-    Qual horario você deseja marcar a consulta?
-    /1 - 08:00
-    /2 - 08:30
-    /3 - 9:00
-    /4 - 9:30
-    /5 - 10:00
-    """
-    chat_id = mensagem.chat.id
-    user = user_dict[chat_id]
-    dia = mensagem.text  
-    user.data = dia    
-    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
-    markup.add("08:00", "08:30", "09:00", "09:30", "10:00")
-    msg = bot.reply_to(mensagem, 'Qual horário você deseja marcar a consulta?', reply_markup=markup)    
-    bot.register_next_step_handler(msg, confirmarClinico)
+    if(mensagem.text == "Voltar"):
+        mensagem.text = ""
+        EscolherClinicoGeral(mensagem)
+    else :
+        chat_id = mensagem.chat.id
+        user = user_dict[chat_id]
+        dia = mensagem.text  
+        user.data = dia    
+        markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+        markup.add("08:00", "08:30", "09:00", "09:30", "10:00","Voltar")
+        msg = bot.reply_to(mensagem, 'Qual horário você deseja marcar a consulta?', reply_markup=markup)    
+        bot.register_next_step_handler(msg, confirmarClinico)
 
 def confirmarClinico(mensagem):  
-    chat_id = mensagem.chat.id
-    user = user_dict[chat_id]
-    hora = mensagem.text  
-    user.hora = hora       
-    texto = f"""
-    Confirma a consulta?
-    Nome: {user.name}
-    Médico: {user.medico}
-    Data: {user.data}
-    Horário: {user.hora}    
-    """
-    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)
-    markup.add("Sim", "Não")
-    msg = bot.reply_to(mensagem, texto, reply_markup=markup)    
-    bot.register_next_step_handler(msg, sucessoClinico)
+    if(mensagem.text == "Voltar"):
+        mensagem.text = ""
+        EscolherDiaClinicoGeral(mensagem)
+    else:    
+        chat_id = mensagem.chat.id
+        user = user_dict[chat_id]
+        hora = mensagem.text  
+        user.hora = hora       
+        texto = f"""
+        Confirma a consulta?
+        Nome: {user.name}
+        Médico: {user.medico}
+        Data: {user.data}
+        Horário: {user.hora}    
+        """
+        markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)
+        markup.add("Sim", "Não")
+        msg = bot.reply_to(mensagem, texto, reply_markup=markup)
+        bot.register_next_step_handler(msg, sucessoClinico)
 
 def sucessoClinico(mensagem):     
-    texto = """
-    Consulta marcada com sucesso!
-    """
+    if(mensagem.text == "Não"):
+        texto=f"""
+        Consulta cancelada!
+        Para marcar uma nova consulta pressione /MarcarConsulta"""
+        bot.reply_to(mensagem, texto)        
+    
+    if(mensagem.text=="Sim"):
+        texto = f"""
+        Consulta marcada com sucesso!
+        para acessar o menu dé um oi para o atendente!
+        """
+        chat_id = mensagem.chat.id
+        user = user_dict[chat_id]
+        with open ("bd.json") as json_file:
+            data = json.load(json_file)
+            temp = data["consulta"]
+            y = {"chat_id" :chat_id, "nome": user.name, "medico": user.medico, "data": user.data, "hora": user.hora}
+            temp.append(y)
+        write_json(data)
+        bot.send_message(mensagem.chat.id, texto)    
+
+@bot.message_handler(commands=["VisualizarConsulta"])
+def VisualizarConsulta(mensagem):
     chat_id = mensagem.chat.id
-    user = user_dict[chat_id]
     with open ("bd.json") as json_file:
         data = json.load(json_file)
-        temp = data["consulta"]
-        y = {"chat_id" :chat_id, "nome": user.name, "medico": user.medico, "data": user.data, "hora": user.hora}
-        temp.append(y)
-    write_json(data)
-    bot.send_message(mensagem.chat.id, texto)    
+        data = data["consulta"]        
+        if(len(data) == 0):
+            bot.reply_to(mensagem, "Você não possui consultas marcadas!")
+        else:
+            for i in data:
+                if i["chat_id"] == chat_id:
+                    texto = f"""
+                    Nome: {i["nome"]}
+                    Médico: {i["medico"]}
+                    Data: {i["data"]}
+                    Horário: {i["hora"]}                    
+                    """                
+                    bot.send_message(mensagem.chat.id, texto)        
+
+@bot.message_handler(commands=["CancelarConsulta"])
+def CancelarConsulta(mensagem):
+    chat_id = mensagem.chat.id
+    with open ("bd.json") as json_file:
+        data = json.load(json_file)
+        data = data["consulta"]
+        markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)
+        for i in data:
+            if i["chat_id"] == chat_id:        
+                markup.add(f"""{i["medico"]} - {i["data"]}""")
+        bot.reply_to(mensagem, "Qual consulta você deseja cancelar?", reply_markup=markup)  
+        bot.register_next_step_handler(mensagem, ApagarConsulta)
+
+def ApagarConsulta(mensagem):
+    chat_id = mensagem.chat.id
+    with open ("bd.json") as json_file:
+        data = json.load(json_file)
+        #data = data["consulta"]
+        if(len(data) == 0):
+            bot.reply_to(mensagem, "Você não possui consultas marcadas!")
+        else:
+            for i in data["consulta"]:
+                if i["chat_id"] == chat_id:
+                    if mensagem.text == f"""{i["medico"]} - {i["data"]}""":
+                        data["consulta"].remove(i)
+                        write_json(data)
+                        bot.reply_to(mensagem, "Consulta cancelada com sucesso!")
+
+
+@bot.message_handler(commands=["ReagendarConsulta"])
+def ReagendarConsulta(mensagem):
+    chat_id = mensagem.chat.id
+    with open ("bd.json") as json_file:
+        data = json.load(json_file)
+        data = data["consulta"]
+        
+        if(len(data) == 0):
+            bot.reply_to(mensagem, "Você não possui consultas marcadas!")
+        else:
+            markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)
+            
+            for i in data:
+                if i["chat_id"] == chat_id:        
+                    markup.add(f"""{i["medico"]} - {i["data"]}""")
+            bot.reply_to(mensagem, "Qual consulta você deseja reagendar?", reply_markup=markup)  
+            bot.register_next_step_handler(mensagem, Reagendar)
+
+def Reagendar(mensagem):
+    chat_id = mensagem.chat.id
+    with open ("bd.json") as json_file:
+        data = json.load(json_file)                
+        
+        for i in data["consulta"]:
+            if i["chat_id"] == chat_id:
+                if mensagem.text == f"""{i["medico"]} - {i["data"]}""":
+                    data["consulta"].remove(i)
+                    write_json(data)
+                    bot.reply_to(mensagem, 
+                    f"""Consulta cancelada!
+                    Agora você pode marcar uma nova consulta!""")                    
+                    MarcarConsulta(mensagem)
 
 
 
@@ -138,7 +228,7 @@ def verificar(mensagem):
     return True
 
 @bot.message_handler(func=verificar)
-def responder(mensagem):            
+def Iniciar(mensagem):            
     texto = f"""
     Olá {mensagem.from_user.first_name},escolha uma opção para continuar (Clique no item):
      /MarcarConsulta Marcar consulta com um médico

@@ -39,58 +39,25 @@
     ],
     "consulta": [
         {
-            "chat_id": "123456789",
-            "medico": "Jose Adolfo",
-            "data": "2019-10-10",
-            "hora": "10:00"
-        },
-        {
-            "nome": "Lucas",
-            "medico": "/1",
-            "data": "/2",
-            "hora": "/3"
-        },
-        {
             "chat_id": 1886897215,
             "nome": "Lucas",
-            "medico": "/1",
-            "data": "/2",
-            "hora": "/3"
+            "medico": "",
+            "data": "21/11/2022",
+            "hora": "08:00"
         },
         {
             "chat_id": 1886897215,
             "nome": "Lucas",
             "medico": "Chico Buarque",
-            "data": "20/11/2022",
-            "hora": "09:30"
-        },
-        {
-            "chat_id": 1886897215,
-            "nome": "Lucas",
-            "medico": "Jose Adolfo",
-            "data": "30/11/2022",
-            "hora": "10:00"
-        },
-        {
-            "chat_id": 1886897215,
-            "nome": "Lucas",
-            "medico": "Chico Buarque",
-            "data": "20/11/2022",
+            "data": "18/12/2022",
             "hora": "08:00"
         },
         {
             "chat_id": 1886897215,
             "nome": "Lucas",
             "medico": "Mariana Silva",
-            "data": "20/11/2022",
+            "data": "26/11/2022",
             "hora": "08:00"
-        },
-        {
-            "chat_id": 1886897215,
-            "nome": "Lucas",
-            "medico": "Jose Adolfo",
-            "data": "20/11/2022",
-            "hora": "09:30"
         }
     ]
 }
