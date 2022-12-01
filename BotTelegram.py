@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from random import randrange
 
 
-CHAVE_API = "5787455269:AAHeom_PmlWUL5jgeiiLkxOPN1Y9ycCjQfc"
+CHAVE_API = "YOUR KEY HERE"
 
 bot = telebot.TeleBot(CHAVE_API)
 
@@ -37,9 +37,9 @@ def MarcarConsulta(mensagem):
     user = User(name)
     user_dict[chat_id] = user    
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)                
-    markup.add("Clinico Geral","Ortopedista","Psicólogo","Voltar")
+    markup.add("Clinico Geral","Ortopedista","Psicologo","Voltar")
     msg = bot.reply_to(mensagem, 'Qual é a sua necessidade?', reply_markup=markup)
-    bot.register_next_step_handler(msg, EscolherEspecialidadeHandler)
+    bot.register_next_step_handler(msg, EscolherClinicoGeral)
 
 def EscolherEspecialidadeHandler(mensagem):
     if(mensagem.text == "Clinico Geral"):
@@ -49,9 +49,10 @@ def EscolherEspecialidadeHandler(mensagem):
         
 
 def EscolherClinicoGeral(mensagem):  
-    # if(mensagem.text == "Voltar"):
-    #     MarcarConsulta(mensagem)  
-    # else :        
+    if(mensagem.text == "Voltar"):
+        mensagem.text = ""
+        Iniciar(mensagem) 
+    else :        
         with open('bd.json') as json_file:
             data = json.load(json_file)
             data = data["medicos"]
@@ -62,7 +63,11 @@ def EscolherClinicoGeral(mensagem):
             /3 - {data[2]["name"]}
             """                        
             markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)                
-            markup.add(data[0]["name"], data[1]["name"], data[2]["name"],"Voltar")
+            for i in data:
+                if i["role"] == mensagem.text:
+                    markup.add(i["name"])
+            markup.add("Voltar")
+            # markup.add(data[0]["name"], data[1]["name"], data[2]["name"],"Voltar")
             msg = bot.reply_to(mensagem, 'Escolha um medico disponivel de sua preferencia! (Clique em uma opção)', reply_markup=markup)      
             bot.register_next_step_handler(msg, EscolherDiaClinicoGeral)
         
@@ -78,7 +83,7 @@ def EscolherDiaClinicoGeral(mensagem):
         user = user_dict[chat_id]
         user.medico = medico
         markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, row_width=1)
-        markup.add((dia).strftime("%d/%m/%Y"), (dia + timedelta(days=randrange(30))).strftime("%d/%m/%Y"), (dia + timedelta(days=randrange(70))).strftime("%d/%m/%Y"),"Voltar")
+        markup.add((dia + timedelta(days=randrange(30))).strftime("%d/%m/%Y"), (dia + timedelta(days=randrange(50))).strftime("%d/%m/%Y"), (dia + timedelta(days=randrange(70))).strftime("%d/%m/%Y"),"Voltar")
         msg = bot.reply_to(mensagem, 'Qual dos dias disponiveis você deseja marcar a consulta? (Clique em uma opção)', reply_markup=markup)            
         bot.register_next_step_handler(msg, EscolherHorarioClinicoGeral)
 

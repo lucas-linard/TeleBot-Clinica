@@ -14,15 +14,15 @@
         },
         {
             "name": "Caetano Veloso",
-            "role": "ortopedista"
+            "role": "Ortopedista"
         },
         {
             "name": "Maria Gadu",
-            "role": "ortopedista"
+            "role": "Ortopedista"
         },
         {
             "name": "Gilberto Gil",
-            "role": "ortopedista"
+            "role": "Ortopedista"
         },
         {
             "name": "Renato Russo",
@@ -41,23 +41,9 @@
         {
             "chat_id": 1886897215,
             "nome": "Lucas",
-            "medico": "",
-            "data": "21/11/2022",
-            "hora": "08:00"
-        },
-        {
-            "chat_id": 1886897215,
-            "nome": "Lucas",
-            "medico": "Chico Buarque",
-            "data": "18/12/2022",
-            "hora": "08:00"
-        },
-        {
-            "chat_id": 1886897215,
-            "nome": "Lucas",
-            "medico": "Mariana Silva",
-            "data": "26/11/2022",
-            "hora": "08:00"
+            "medico": "Caetano Veloso",
+            "data": "31/12/2022",
+            "hora": "10:00"
         }
     ]
 }
